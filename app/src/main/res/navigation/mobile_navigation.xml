@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/mobile_navigation"
+	app:startDestination="@+id/navigation_recents">
+
+	<fragment
+		android:id="@+id/navigation_recents"
+		android:label="@string/title_recents"
+		android:name="com.zello.sdk.example.app.ui.recents.RecentsFragment"
+		tools:layout="@layout/fragment_recents" />
+
+	<fragment
+		android:id="@+id/navigation_users"
+		android:label="@string/title_users"
+		android:name="com.zello.sdk.example.app.ui.users.UsersFragment"
+		tools:layout="@layout/fragment_users" />
+
+	<fragment
+		android:id="@+id/navigation_channels"
+		android:label="@string/title_channels"
+		android:name="com.zello.sdk.example.app.ui.channels.ChannelsFragment"
+		tools:layout="@layout/fragment_channels" />
+</navigation>

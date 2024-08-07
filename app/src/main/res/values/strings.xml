@@ -1,0 +1,19 @@
+<resources>
+	<string name="app_name">Zello SDK Example App</string>
+	<string name="title_users">Users</string>
+	<string name="title_channels">Channels</string>
+	<string name="title_recents">Recents</string>
+
+	<string name="connect">Connect</string>
+	<string name="connecting">Connecting</string>
+	<string name="connected">Connected</string>
+	<string name="disconnect">Disconnect</string>
+	<string name="disconnected">Disconnected</string>
+	<string name="ptt">PTT</string>
+	<string name="talking">Talking</string>
+	<string name="receiving">Receiving</string>
+	<string name="close">Close</string>
+	<string name="send">Send</string>
+	<string name="all_users">All Users</string>
+	<string name="connected_users">Connected Users Only</string>
+</resources>
