@@ -9,6 +9,7 @@
 	<string name="connected">Connected</string>
 	<string name="disconnect">Disconnect</string>
 	<string name="disconnected">Disconnected</string>
+	<string name="set_status">Set Status</string>
 	<string name="ptt">PTT</string>
 	<string name="talking">Talking</string>
 	<string name="receiving">Receiving</string>

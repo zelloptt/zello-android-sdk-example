@@ -3,6 +3,7 @@ package com.zello.sdk.example.app
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.ComposeView
@@ -15,6 +16,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.zello.sdk.ZelloAccountStatus
 import com.zello.sdk.ZelloCredentials
+import com.zello.sdk.ZelloState
 import com.zello.sdk.example.app.databinding.ActivityMainBinding
 import com.zello.sdk.example.app.repositories.ZelloRepository
 import com.zello.sdk.example.app.ui.shared.ConnectDialog
@@ -28,8 +30,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-	@Inject
-	lateinit var zelloRepository: ZelloRepository
+	@Inject lateinit var repository: ZelloRepository
 
 	private lateinit var binding: ActivityMainBinding
 
@@ -52,23 +53,31 @@ class MainActivity : AppCompatActivity() {
 				R.id.navigation_recents,
 				R.id.navigation_users,
 				R.id.navigation_channels
-				 )
-													 )
+			)
+		)
 		setupActionBarWithNavController(navController, appBarConfiguration)
 		navView.setupWithNavController(navController)
 
+		repository.zello.start()
+
 		lifecycleScope.launch {
-			zelloRepository.isConnected.collectLatest { _ ->
+			repository.state.collect {
+				invalidateOptionsMenu()
+				updateUi()
+			}
+		}
+		lifecycleScope.launch {
+			repository.isConnected.collectLatest { _ ->
 				invalidateOptionsMenu()
 			}
 		}
 		lifecycleScope.launch {
-			zelloRepository.isConnecting.collectLatest { _ ->
+			repository.isConnecting.collectLatest { _ ->
 				invalidateOptionsMenu()
 			}
 		}
 		lifecycleScope.launch {
-			zelloRepository.accountStatus.collectLatest { _ ->
+			repository.accountStatus.collectLatest { _ ->
 				invalidateOptionsMenu()
 			}
 		}
@@ -77,24 +86,29 @@ class MainActivity : AppCompatActivity() {
 		composeView.setContent {
 			if (showDialog.value) {
 				ConnectDialog(
-					onDismiss = { showDialog.value = false },
+					onDismiss = {
+						showDialog.value = false
+					},
 					onConnect = { username, password, network ->
-						zelloRepository.zello.connect(ZelloCredentials(network, username, password))
+						repository.zello.connect(ZelloCredentials(network, username, password))
 						showDialog.value = false
 					}
-							 )
+				)
 			}
 
-			val accountStatus = zelloRepository.accountStatus.asLiveData()
+			val accountStatus = repository.accountStatus.asLiveData()
 			if (showStatusMenu.value) {
 				StatusDialog(
 					selectedStatus = accountStatus.value ?: ZelloAccountStatus.AVAILABLE,
-					onDismiss = { showStatusMenu.value = false },
+					onDismiss = {
+						showStatusMenu.value = false
+					},
 					onSelectStatus = { status ->
-						zelloRepository.zello.setAccountStatus(status)
+						repository.zello.setAccountStatus(status)
+						repository.zello.setAccountStatus(status)
 						showStatusMenu.value = false
 					}
-							)
+				)
 			}
 		}
 
@@ -102,11 +116,19 @@ class MainActivity : AppCompatActivity() {
 	}
 
 	override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+		if (repository.zello.state != ZelloState.Started) {
+			menu?.clear()
+			return true
+		}
 		menuInflater.inflate(R.menu.menu_main, menu)
 		val connectItem = menu?.findItem(R.id.connect_button)
-		val isConnected = zelloRepository.isConnected.value
-		val isConnecting = zelloRepository.isConnecting.value
-		connectItem?.title = if (isConnected) "Disconnect" else if (isConnecting) "Connecting" else "Connect"
+		val isConnected = repository.isConnected.value
+		val isConnecting = repository.isConnecting.value
+		connectItem?.title = when {
+			isConnected -> getString(R.string.disconnect)
+			isConnecting -> getString(R.string.connecting)
+			else -> getString(R.string.connect)
+		}
 
 		val statusItem = menu?.findItem(R.id.status_button)
 		statusItem?.isVisible = isConnected
@@ -116,9 +138,9 @@ class MainActivity : AppCompatActivity() {
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
 		return when (item.itemId) {
 			R.id.connect_button -> {
-				val isConnected = zelloRepository.isConnected.value
+				val isConnected = repository.isConnected.value
 				if (isConnected) {
-					zelloRepository.zello.disconnect()
+					repository.zello.disconnect()
 				} else {
 					showDialog.value = true
 				}
@@ -131,6 +153,13 @@ class MainActivity : AppCompatActivity() {
 			}
 
 			else -> super.onOptionsItemSelected(item)
+		}
+	}
+
+	private fun updateUi() {
+		binding.root.visibility = when (repository.zello.state) {
+			ZelloState.Started -> View.VISIBLE
+			else -> View.INVISIBLE
 		}
 	}
 }

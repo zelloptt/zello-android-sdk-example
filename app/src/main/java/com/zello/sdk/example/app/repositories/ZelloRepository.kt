@@ -17,6 +17,7 @@ import com.zello.sdk.ZelloLocationMessage
 import com.zello.sdk.ZelloOutgoingEmergency
 import com.zello.sdk.ZelloOutgoingVoiceMessage
 import com.zello.sdk.ZelloRecentEntry
+import com.zello.sdk.ZelloState
 import com.zello.sdk.ZelloTextMessage
 import com.zello.sdk.ZelloUser
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -30,6 +31,9 @@ class ZelloRepository @Inject constructor(
 	@ApplicationContext val context: Context,
 	val zello: Zello
 ) : Zello.Listener {
+
+	private val _state = MutableStateFlow(zello.state)
+	val state = _state.asStateFlow()
 
 	private val _isConnected = MutableStateFlow(false)
 	val isConnected = _isConnected.asStateFlow()
@@ -84,6 +88,10 @@ class ZelloRepository @Inject constructor(
 
 	init {
 		zello.listener = this
+	}
+
+	override fun onStateChanged(sdk: Zello, state: ZelloState) {
+		_state.value = state
 	}
 
 	override fun onConnectStarted(zello: Zello) {
