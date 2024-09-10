@@ -28,6 +28,7 @@ fun ThreeDotsMenu(
 	showAlertOption: Boolean = true,
 	showLocationOption: Boolean = true,
 	showTextOption: Boolean = true,
+	showEndCallOption: Boolean = false,
 	sendImage: (ByteArray) -> Unit,
 	sendText: () -> Unit,
 	sendLocation: () -> Unit,
@@ -35,7 +36,8 @@ fun ThreeDotsMenu(
 	toggleMute: () -> Unit,
 	startEmergency: (() -> Unit)? = null,
 	stopEmergency: (() -> Unit)? = null,
-	showHistory: () -> Unit
+	showHistory: () -> Unit,
+	endCall: (() -> Unit)? = null,
 ) {
 	Box {
 		var dropDownExpanded by remember { mutableStateOf(false) }
@@ -111,6 +113,15 @@ fun ThreeDotsMenu(
 						} else {
 							startEmergency?.invoke()
 						}
+						dropDownExpanded = false
+					}
+				)
+			}
+			if (showEndCallOption) {
+				DropdownMenuItem(
+					text = { Text("End call") },
+					onClick = {
+						endCall?.invoke()
 						dropDownExpanded = false
 					}
 				)
