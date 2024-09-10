@@ -38,10 +38,10 @@ fun LocationDialog(
 					Text(
 						text = it,
 						modifier = Modifier
-                            .background(
-                                color = Color.White,
-                            )
-                            .padding(16.dp)
+							.background(
+								color = Color.White,
+							)
+							.padding(16.dp)
 					)
 					Button(onClick = {
 						showImagePopup = false

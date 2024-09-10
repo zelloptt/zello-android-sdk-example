@@ -7,8 +7,10 @@ import androidx.lifecycle.asLiveData
 import com.zello.sdk.ZelloAlertMessage
 import com.zello.sdk.ZelloChannel
 import com.zello.sdk.ZelloContact
+import com.zello.sdk.ZelloDispatchChannel
 import com.zello.sdk.ZelloHistoryMessage
 import com.zello.sdk.ZelloHistoryVoiceMessage
+import com.zello.sdk.ZelloConsoleSettings
 import com.zello.sdk.example.app.repositories.ZelloRepository
 import com.zello.sdk.example.app.ui.shared.types.IncomingAlertViewState
 import com.zello.sdk.example.app.ui.shared.types.IncomingEmergenciesViewState
@@ -102,6 +104,9 @@ class ChannelsViewModel @Inject constructor(val zelloRepository: ZelloRepository
 	private val _historyVoiceMessage = zelloRepository.historyVoiceMessage.asLiveData()
 	val historyVoiceMessage: LiveData<ZelloHistoryVoiceMessage?> = _historyVoiceMessage
 
+	private val _settings = zelloRepository.settings.asLiveData()
+	val settings: LiveData<ZelloConsoleSettings?> = _settings
+
 	fun setSelectedContact(channel: ZelloChannel) {
 		zelloRepository.zello.setSelectedContact(channel)
 	}
@@ -191,5 +196,9 @@ class ChannelsViewModel @Inject constructor(val zelloRepository: ZelloRepository
 
 	fun stopHistoryPlayback() {
 		zelloRepository.zello.stopHistoryMessagePlayback()
+	}
+
+	fun endCall(call: ZelloDispatchChannel.Call, channel: ZelloDispatchChannel) {
+		zelloRepository.zello.endDispatchCall(call, channel)
 	}
 }

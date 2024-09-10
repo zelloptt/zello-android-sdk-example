@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.zello.sdk.ZelloChannel
+import com.zello.sdk.ZelloDispatchChannel
 import com.zello.sdk.ZelloHistoryVoiceMessage
 import com.zello.sdk.ZelloOutgoingVoiceMessage
 import com.zello.sdk.example.app.R
@@ -170,6 +171,8 @@ class ChannelsFragment : Fragment() {
 			val isInOutgoingEmergency = outgoingEmergencyViewState?.emergency?.channel?.isSameAs(channel) == true
 			val emergencyChannel = viewModel.emergencyChannel.observeAsState().value
 			val activeIncomingEmergency = incomingEmergenciesViewState?.emergencies?.find { it.channel.isSameAs(channel) }
+			val settings = viewModel.settings.observeAsState().value
+			val call = (channel as? ZelloDispatchChannel)?.currentCall
 			Column(
 				modifier = Modifier.weight(1f)
 			) {
@@ -182,6 +185,9 @@ class ChannelsFragment : Fragment() {
 					Text(text = "ACTIVE OUTGOING EMERGENCY")
 				}
 				Text(text = "${channel.usersOnline} users connected")
+				if (call != null) {
+					Text(text = "Current call: ${call.status}")
+				}
 			}
 			val isConnected = channel.status == ZelloChannel.ConnectionStatus.CONNECTED
 			if (!channel.options.hidePowerButton && !(isConnected && channel.options.noDisconnect)) {
@@ -194,6 +200,7 @@ class ChannelsFragment : Fragment() {
 				showAlertOption = channel.options.allowAlerts,
 				showTextOption = channel.options.allowTextMessages,
 				showLocationOption = channel.options.allowLocations,
+				showEndCallOption = if (settings != null && call != null && !call.isCompleted()) settings.allowNonDispatchersToEndCalls else false,
 				sendImage = {
 					viewModel.sendImage(it, channel)
 				},
@@ -213,6 +220,11 @@ class ChannelsFragment : Fragment() {
 				},
 				showHistory = {
 					viewModel.getHistory(channel)
+				},
+				endCall = {
+					(channel as? ZelloDispatchChannel)?.currentCall?.let {
+						viewModel.endCall(it, channel)
+					}
 				}
 			)
 			TalkButton(channel = channel)
