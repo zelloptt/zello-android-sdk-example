@@ -52,7 +52,8 @@ class MainActivity : AppCompatActivity() {
 			setOf(
 				R.id.navigation_recents,
 				R.id.navigation_users,
-				R.id.navigation_channels
+				R.id.navigation_channels,
+				R.id.navigation_group_conversations
 			)
 		)
 		setupActionBarWithNavController(navController, appBarConfiguration)

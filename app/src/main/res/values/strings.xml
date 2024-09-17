@@ -3,6 +3,7 @@
 	<string name="title_users">Users</string>
 	<string name="title_channels">Channels</string>
 	<string name="title_recents">Recents</string>
+	<string name="title_group_conversations">Group Conversations</string>
 
 	<string name="connect">Connect</string>
 	<string name="connecting">Connecting</string>

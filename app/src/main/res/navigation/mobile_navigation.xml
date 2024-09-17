@@ -22,4 +22,10 @@
 		android:label="@string/title_channels"
 		android:name="com.zello.sdk.example.app.ui.channels.ChannelsFragment"
 		tools:layout="@layout/fragment_channels" />
+
+	<fragment
+		android:id="@+id/navigation_group_conversations"
+		android:label="@string/title_group_conversations"
+		android:name="com.zello.sdk.example.app.ui.groupconversations.GroupConversationsFragment"
+		tools:layout="@layout/fragment_group_conversations" />
 </navigation>

@@ -16,4 +16,9 @@
 		android:icon="@drawable/ic_channels_black_24dp"
 		android:title="@string/title_channels" />
 
+	<item
+		android:id="@+id/navigation_group_conversations"
+		android:icon="@drawable/ic_group_conversations_black_24dp"
+		android:title="@string/title_group_conversations" />
+
 </menu>

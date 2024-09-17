@@ -84,6 +84,8 @@ class UsersFragment : Fragment() {
 	@Composable
 	private fun Users() {
 		val users = viewModel.users.observeAsState().value ?: emptyList()
+		val outgoingVoiceMessageViewState = viewModel.outgoingVoiceMessageViewState.observeAsState().value
+
 		val image = viewModel.incomingImageViewState.observeAsState().value
 		ImageDialog(
 			state = image,
@@ -137,7 +139,8 @@ class UsersFragment : Fragment() {
 			}
 		}
 		LazyColumn(
-			modifier = Modifier.fillMaxSize()
+			modifier = Modifier.fillMaxSize(),
+			userScrollEnabled = outgoingVoiceMessageViewState?.state == null
 		) {
 			items(users.size) { index ->
 				if (index != 0) {
@@ -164,6 +167,7 @@ class UsersFragment : Fragment() {
 		showSendText: () -> Unit = {}
 	) {
 		val selectedContact = viewModel.selectedContact.observeAsState().value
+		val settings = viewModel.settings.observeAsState().value
 		Box {
 			Row(
 				modifier = Modifier
@@ -201,6 +205,10 @@ class UsersFragment : Fragment() {
 				}
 				ThreeDotsMenu(
 					contact = user,
+					showImageOption = settings?.allowImageMessages == true,
+					showAlertOption = settings?.allowAlertMessages == true,
+					showTextOption = settings?.allowTextMessages == true,
+					showLocationOption = settings?.allowLocationMessages == true,
 					sendImage = {
 						viewModel.sendImage(it, user)
 					},

@@ -18,6 +18,7 @@ import com.zello.sdk.ZelloOutgoingEmergency
 import com.zello.sdk.ZelloOutgoingVoiceMessage
 import com.zello.sdk.ZelloRecentEntry
 import com.zello.sdk.ZelloConsoleSettings
+import com.zello.sdk.ZelloGroupConversation
 import com.zello.sdk.ZelloState
 import com.zello.sdk.ZelloTextMessage
 import com.zello.sdk.ZelloUser
@@ -48,6 +49,8 @@ class ZelloRepository @Inject constructor(
 	val onUsersUpdated = _onUsersUpdated.asStateFlow()
 	private val _onChannelsUpdated = MutableStateFlow<List<ZelloChannel>>(emptyList())
 	val onChannelsUpdated = _onChannelsUpdated.asStateFlow()
+	private val _onGroupConversationsUpdated = MutableStateFlow<List<ZelloGroupConversation>>(emptyList())
+	val onGroupConversationsUpdated = _onGroupConversationsUpdated.asStateFlow()
 
 	private val _outgoingVoiceMessage = MutableStateFlow<ZelloOutgoingVoiceMessage?>(null)
 	val outgoingVoiceMessage = _outgoingVoiceMessage.asStateFlow()
@@ -117,6 +120,7 @@ class ZelloRepository @Inject constructor(
 		_isConnecting.value = false
 		_onUsersUpdated.value = zello.users
 		_onChannelsUpdated.value = zello.channels
+		_onGroupConversationsUpdated.value = zello.groupConversations
 	}
 
 	override fun onWillReconnect(zello: Zello) {
@@ -173,6 +177,7 @@ class ZelloRepository @Inject constructor(
 	override fun onContactListUpdated(zello: Zello) {
 		_onUsersUpdated.value = zello.users
 		_onChannelsUpdated.value = zello.channels
+		_onGroupConversationsUpdated.value = zello.groupConversations
 		_emergencyChannel.value = zello.emergencyChannel
 	}
 
