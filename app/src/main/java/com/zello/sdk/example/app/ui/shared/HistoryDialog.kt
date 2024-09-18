@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.zello.sdk.Zello
+import com.zello.sdk.ZelloGroupConversation
 import com.zello.sdk.ZelloHistoryAlertMessage
 import com.zello.sdk.ZelloHistoryImageMessage
 import com.zello.sdk.ZelloHistoryLocationMessage
@@ -75,7 +76,11 @@ fun HistoryDialog(
 
 @Composable
 private fun HistoryMessage(message: ZelloHistoryMessage, zello: Zello, onMessageClick: (ZelloHistoryMessage) -> Unit) {
-	val title = if (message.channelUser != null) "${message.channelUser?.name} : ${message.contact.name}" else message.contact.name
+	val contactName = when (val contact = message.contact) {
+		is ZelloGroupConversation -> contact.displayName
+		else -> contact.name
+	}
+	val title = if (message.channelUser != null) "${message.channelUser?.displayName} : $contactName" else contactName
 	Row(modifier = Modifier
 		.fillMaxSize()
 		.clickable { onMessageClick(message) }, verticalAlignment = Alignment.CenterVertically

@@ -12,7 +12,8 @@ class UserPreviewProvider : PreviewParameterProvider<ZelloUser> {
 			status = ZelloUser.Status.AVAILABLE,
 			customStatusText = "custom status text",
 			profilePictureUrl = null,
-			profilePictureThumbnailUrl = null
+			profilePictureThumbnailUrl = null,
+			supportedFeatures = ZelloUser.SupportedFeatures(groupConversations = true)
 		)
 	)
 }

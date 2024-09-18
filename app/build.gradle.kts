@@ -62,9 +62,9 @@ android {
 dependencies {
 
 	// Required Dependencies to use the Zello SDK
-	implementation("com.zello:sdk:0.4.0")
-	implementation("com.zello:zello:0.4.0")
-	implementation("com.zello:core:0.4.0") {
+	implementation(libs.sdk)
+	implementation(libs.zello)
+	implementation(libs.core.get().let { "${it.module}:${it.versionConstraint.requiredVersion}" }) {
 		exclude(module = "unspecified")
 	}
 	implementation(platform("com.google.firebase:firebase-bom:32.8.0"))

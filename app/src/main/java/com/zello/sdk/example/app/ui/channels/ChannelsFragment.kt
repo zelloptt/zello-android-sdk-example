@@ -39,6 +39,7 @@ import com.zello.sdk.ZelloOutgoingVoiceMessage
 import com.zello.sdk.example.app.R
 import com.zello.sdk.example.app.databinding.FragmentChannelsBinding
 import com.zello.sdk.example.app.ui.shared.CallAlertDialog
+import com.zello.sdk.example.app.ui.shared.ChannelConnectionSwitch
 import com.zello.sdk.example.app.ui.shared.HistoryDialog
 import com.zello.sdk.example.app.ui.shared.ImageDialog
 import com.zello.sdk.example.app.ui.shared.ListItemTalkButton
@@ -79,6 +80,8 @@ class ChannelsFragment : Fragment() {
 	@Composable
 	private fun Channels() {
 		val channels = viewModel.channels.observeAsState().value ?: emptyList()
+		val outgoingVoiceMessageViewState = viewModel.outgoingVoiceMessageViewState.observeAsState().value
+
 		val image = viewModel.incomingImageViewState.observeAsState().value
 		ImageDialog(
 			state = image,
@@ -132,8 +135,8 @@ class ChannelsFragment : Fragment() {
 			}
 		}
 		LazyColumn(
-			modifier = Modifier
-				.fillMaxSize()
+			modifier = Modifier.fillMaxSize(),
+			userScrollEnabled = outgoingVoiceMessageViewState?.state == null
 		) {
 			items(channels.size) { index ->
 				if (index != 0) {
@@ -179,7 +182,7 @@ class ChannelsFragment : Fragment() {
 				Text(text = channel.name)
 				Text(text = stringResource(id = if (channel.status == ZelloChannel.ConnectionStatus.CONNECTED) R.string.connected else R.string.disconnected))
 				if (activeIncomingEmergency != null) {
-					Text(text = "ACTIVE INCOMING EMERGENCY : ${activeIncomingEmergency.channelUser.name}")
+					Text(text = "ACTIVE INCOMING EMERGENCY : ${activeIncomingEmergency.channelUser.displayName}")
 				}
 				if (isInOutgoingEmergency) {
 					Text(text = "ACTIVE OUTGOING EMERGENCY")
@@ -191,16 +194,17 @@ class ChannelsFragment : Fragment() {
 			}
 			val isConnected = channel.status == ZelloChannel.ConnectionStatus.CONNECTED
 			if (!channel.options.hidePowerButton && !(isConnected && channel.options.noDisconnect)) {
-				ChannelConnectionSwitch(channel = channel)
+				ChannelConnectionSwitch(channel = channel, onCheckChanged = { if (it) viewModel.connectChannel(channel) else viewModel.disconnectChannel(channel) })
 			}
 			ThreeDotsMenu(
 				contact = channel,
-				showEmergencyOption = emergencyChannel?.isSameAs(channel) == true,
 				isInOutgoingEmergency = isInOutgoingEmergency,
-				showAlertOption = channel.options.allowAlerts,
-				showTextOption = channel.options.allowTextMessages,
-				showLocationOption = channel.options.allowLocations,
-				showEndCallOption = if (settings != null && call != null && !call.isCompleted()) settings.allowNonDispatchersToEndCalls else false,
+				showEmergencyOption = isConnected && emergencyChannel?.isSameAs(channel) == true,
+				showAlertOption = isConnected && settings?.allowAlertMessages == true && channel.options.allowAlerts,
+				showTextOption = isConnected && settings?.allowTextMessages == true && channel.options.allowTextMessages,
+				showLocationOption = isConnected && settings?.allowLocationMessages == true && channel.options.allowLocations,
+				showImageOption = isConnected && settings?.allowImageMessages == true,
+				showEndCallOption = isConnected && if (settings != null && call != null && !call.isCompleted()) settings.allowNonDispatchersToEndCalls else false,
 				sendImage = {
 					viewModel.sendImage(it, channel)
 				},
@@ -246,16 +250,6 @@ class ChannelsFragment : Fragment() {
 			isReceiving = isReceiving,
 			onDown = { viewModel.startVoiceMessage(channel) },
 			onUp = { viewModel.stopVoiceMessage() }
-		)
-	}
-
-	@Composable
-	private fun ChannelConnectionSwitch(channel: ZelloChannel) {
-		val isConnected = channel.status == ZelloChannel.ConnectionStatus.CONNECTED
-		Switch(
-			checked = isConnected,
-			enabled = !(channel.options.noDisconnect && isConnected) && channel.status != ZelloChannel.ConnectionStatus.CONNECTING,
-			onCheckedChange = { if (it) viewModel.connectChannel(channel) else viewModel.disconnectChannel(channel) }
 		)
 	}
 

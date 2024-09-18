@@ -1,11 +1,13 @@
-package com.zello.sdk.example.app.ui.users
+package com.zello.sdk.example.app.ui.groupconversations
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import com.zello.sdk.ZelloChannel
 import com.zello.sdk.ZelloConsoleSettings
 import com.zello.sdk.ZelloContact
+import com.zello.sdk.ZelloGroupConversation
 import com.zello.sdk.ZelloHistoryMessage
 import com.zello.sdk.ZelloHistoryVoiceMessage
 import com.zello.sdk.ZelloUser
@@ -20,9 +22,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class UsersViewModel @Inject constructor(val zelloRepository: ZelloRepository) : ViewModel() {
+class GroupConversationsViewModel @Inject constructor(val zelloRepository: ZelloRepository) : ViewModel() {
+	private val _groupConversations = zelloRepository.onGroupConversationsUpdated.asLiveData()
+	val groupConversations: LiveData<List<ZelloGroupConversation>> = _groupConversations
+
 	private val _users = zelloRepository.onUsersUpdated.asLiveData()
 	val users: LiveData<List<ZelloUser>> = _users
+
+	private val _isConnected = zelloRepository.isConnected.asLiveData()
+	val isConnected: LiveData<Boolean> = _isConnected
 
 	private val _outgoingVoiceMessageViewState = MediatorLiveData<OutgoingVoiceMessageViewState>().apply {
 		addSource(zelloRepository.outgoingVoiceMessage.asLiveData()) { outgoingMessage ->
@@ -84,23 +92,23 @@ class UsersViewModel @Inject constructor(val zelloRepository: ZelloRepository) :
 	private val _settings = zelloRepository.settings.asLiveData()
 	val settings: LiveData<ZelloConsoleSettings?> = _settings
 
-	fun setSelectedContact(user: ZelloUser) {
-		zelloRepository.zello.setSelectedContact(user)
+	fun setSelectedContact(conversation: ZelloGroupConversation) {
+		zelloRepository.zello.setSelectedContact(conversation)
 	}
 
-	fun startVoiceMessage(user: ZelloUser) {
+	fun startVoiceMessage(conversation: ZelloGroupConversation) {
 		stopVoiceMessage()
-		zelloRepository.zello.startVoiceMessage(user)
+		zelloRepository.zello.startVoiceMessage(conversation)
 	}
 
 	fun stopVoiceMessage() {
 		zelloRepository.zello.stopVoiceMessage()
 	}
 
-	fun sendImage(image: ByteArray, user: ZelloUser) {
+	fun sendImage(image: ByteArray, conversation: ZelloGroupConversation) {
 		zelloRepository.zello.sendImage(
 			image,
-			user
+			conversation
 		)
 	}
 
@@ -108,18 +116,18 @@ class UsersViewModel @Inject constructor(val zelloRepository: ZelloRepository) :
 		zelloRepository.clearIncomingImage()
 	}
 
-	fun sendLocation(user: ZelloUser) {
-		zelloRepository.zello.sendLocation(user)
+	fun sendLocation(conversation: ZelloGroupConversation) {
+		zelloRepository.zello.sendLocation(conversation)
 	}
 
 	fun locationDismissed() {
 		zelloRepository.clearIncomingLocation()
 	}
 
-	fun sendText(user: ZelloUser, message: String) {
+	fun sendText(conversation: ZelloGroupConversation, message: String) {
 		zelloRepository.zello.sendText(
 			message,
-			user
+			conversation
 		)
 	}
 
@@ -131,20 +139,20 @@ class UsersViewModel @Inject constructor(val zelloRepository: ZelloRepository) :
 		zelloRepository.clearIncomingAlert()
 	}
 
-	fun onSendAlert(user: ZelloUser, text: String) {
-		zelloRepository.zello.sendAlert(user, text, null)
+	fun onSendAlert(conversation: ZelloGroupConversation, text: String) {
+		zelloRepository.zello.sendAlert(conversation, text)
 	}
 
-	fun toggleMute(user: ZelloUser) {
-		if (user.isMuted) {
-			zelloRepository.zello.unmuteContact(user)
+	fun toggleMute(conversation: ZelloGroupConversation) {
+		if (conversation.isMuted) {
+			zelloRepository.zello.unmuteContact(conversation)
 		} else {
-			zelloRepository.zello.muteContact(user)
+			zelloRepository.zello.muteContact(conversation)
 		}
 	}
 
-	fun getHistory(user: ZelloUser) {
-		zelloRepository.getHistory(user)
+	fun getHistory(conversation: ZelloGroupConversation) {
+		zelloRepository.getHistory(conversation)
 	}
 
 	fun clearHistory() {
@@ -157,5 +165,29 @@ class UsersViewModel @Inject constructor(val zelloRepository: ZelloRepository) :
 
 	fun stopHistoryPlayback() {
 		zelloRepository.zello.stopHistoryMessagePlayback()
+	}
+
+	fun createConversation(users: List<ZelloUser>) {
+		zelloRepository.zello.createGroupConversation(users)
+	}
+
+	fun addUsersToConversation(conversation: ZelloGroupConversation, users: List<ZelloUser>) {
+		zelloRepository.zello.addUsersToGroupConversation(conversation, users)
+	}
+
+	fun leaveConversation(conversation: ZelloGroupConversation) {
+		zelloRepository.zello.leaveGroupConversation(conversation)
+	}
+
+	fun renameConversation(conversation: ZelloGroupConversation, name: String) {
+		zelloRepository.zello.renameGroupConversation(conversation, name)
+	}
+
+	fun connectChannel(channel: ZelloChannel) {
+		zelloRepository.zello.connectChannel(channel)
+	}
+
+	fun disconnectChannel(channel: ZelloChannel) {
+		zelloRepository.zello.disconnectChannel(channel)
 	}
 }

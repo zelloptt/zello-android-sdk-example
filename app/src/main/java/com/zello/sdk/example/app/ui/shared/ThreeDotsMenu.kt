@@ -28,7 +28,11 @@ fun ThreeDotsMenu(
 	showAlertOption: Boolean = true,
 	showLocationOption: Boolean = true,
 	showTextOption: Boolean = true,
+	showImageOption: Boolean = true,
 	showEndCallOption: Boolean = false,
+	showAddUsersToConversationOption: Boolean = false,
+	showLeaveConversationOption: Boolean = false,
+	showRenameConversationOption: Boolean = false,
 	sendImage: (ByteArray) -> Unit,
 	sendText: () -> Unit,
 	sendLocation: () -> Unit,
@@ -38,6 +42,9 @@ fun ThreeDotsMenu(
 	stopEmergency: (() -> Unit)? = null,
 	showHistory: () -> Unit,
 	endCall: (() -> Unit)? = null,
+	addUsersToConversation: (() -> Unit)? = null,
+	leaveConversation: (() -> Unit)? = null,
+	renameConversation: (() -> Unit)? = null
 ) {
 	Box {
 		var dropDownExpanded by remember { mutableStateOf(false) }
@@ -54,22 +61,24 @@ fun ThreeDotsMenu(
 			expanded = dropDownExpanded,
 			onDismissRequest = { dropDownExpanded = false }
 		) {
-			DropdownMenuItem(
-				text = { Text("Send Image") },
-				onClick = {
-					// Sends a static image from resources purely as an example. An image
-					// could come from a file, the camera, etc.
-					val bitmap = ContextCompat.getDrawable(
-						context,
-						R.drawable.ic_launcher_background
-					)?.toBitmap()
-					val stream = ByteArrayOutputStream()
-					bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-					val bitmapData = stream.toByteArray()
-					sendImage(bitmapData)
-					dropDownExpanded = false
-				}
-			)
+			if (showImageOption) {
+				DropdownMenuItem(
+					text = { Text("Send Image") },
+					onClick = {
+						// Sends a static image from resources purely as an example. An image
+						// could come from a file, the camera, etc.
+						val bitmap = ContextCompat.getDrawable(
+							context,
+							R.drawable.ic_launcher_background
+						)?.toBitmap()
+						val stream = ByteArrayOutputStream()
+						bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+						val bitmapData = stream.toByteArray()
+						sendImage(bitmapData)
+						dropDownExpanded = false
+					}
+				)
+			}
 			if (showTextOption) {
 				DropdownMenuItem(
 					text = { Text("Send Text") },
@@ -122,6 +131,33 @@ fun ThreeDotsMenu(
 					text = { Text("End call") },
 					onClick = {
 						endCall?.invoke()
+						dropDownExpanded = false
+					}
+				)
+			}
+			if (showAddUsersToConversationOption) {
+				DropdownMenuItem(
+					text = { Text("Add Users to Conversation") },
+					onClick = {
+						addUsersToConversation?.invoke()
+						dropDownExpanded = false
+					}
+				)
+			}
+			if (showLeaveConversationOption) {
+				DropdownMenuItem(
+					text = { Text("Leave Conversation") },
+					onClick = {
+						leaveConversation?.invoke()
+						dropDownExpanded = false
+					}
+				)
+			}
+			if (showRenameConversationOption) {
+				DropdownMenuItem(
+					text = { Text("Rename Conversation") },
+					onClick = {
+						renameConversation?.invoke()
 						dropDownExpanded = false
 					}
 				)

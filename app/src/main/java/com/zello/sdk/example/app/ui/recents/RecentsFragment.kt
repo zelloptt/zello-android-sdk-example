@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.zello.sdk.ZelloGroupConversation
 import com.zello.sdk.ZelloRecentEntry
 import com.zello.sdk.example.app.R
 import com.zello.sdk.example.app.databinding.FragmentRecentsBinding
@@ -72,7 +73,11 @@ class RecentsFragment : Fragment() {
 
 	@Composable
 	private fun Recent(recent: ZelloRecentEntry) {
-		val title = if (recent.channelUser != null) "${recent.channelUser?.name} : ${recent.contact.name}" else recent.contact.name
+		val contactName = when (val contact = recent.contact) {
+			is ZelloGroupConversation -> contact.displayName
+			else -> contact.name
+		}
+		val title = if (recent.channelUser != null) "${recent.channelUser?.displayName} : $contactName" else contactName
 		Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
 			Image(
 				painter = painterResource(id = if (recent.incoming) R.drawable.ic_incoming_24dp else R.drawable.ic_outgoing_24dp),
