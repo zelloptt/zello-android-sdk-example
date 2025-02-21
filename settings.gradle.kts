@@ -14,11 +14,14 @@ pluginManagement {
 dependencyResolutionManagement {
 	repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 	repositories {
-		google()
-		mavenCentral()
 		maven {
 			url = uri("https://zello-sdk.s3.amazonaws.com/android/latest")
+			content {
+				includeGroupAndSubgroups("com.zello")
+			}
 		}
+		google()
+		mavenCentral()
 	}
 }
 
