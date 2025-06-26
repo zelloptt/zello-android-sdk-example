@@ -1,8 +1,9 @@
 plugins {
 	alias(libs.plugins.androidApplication)
 	alias(libs.plugins.jetbrainsKotlinAndroid)
-	id("com.google.dagger.hilt.android") version "2.51"
-	id("com.google.devtools.ksp") version "1.9.22+"
+	id("com.google.dagger.hilt.android") version "2.52"
+	id("com.google.devtools.ksp") version "2.0.10-1.0.24"
+	alias(libs.plugins.compose.compiler)
 	// Uncomment to enable Firebase services. Requires google-services.json file.
 	// Also uncomment the noted line in the project level build.gradle.kts file.
 	// id("com.google.gms.google-services") version "4.4.1"
@@ -38,18 +39,16 @@ android {
 		}
 	}
 	compileOptions {
-		sourceCompatibility = JavaVersion.VERSION_1_8
-		targetCompatibility = JavaVersion.VERSION_1_8
+		sourceCompatibility = JavaVersion.VERSION_17
+		targetCompatibility =JavaVersion.VERSION_17
 	}
+
 	kotlinOptions {
-		jvmTarget = "1.8"
+		jvmTarget = "17"
 	}
 	buildFeatures {
 		viewBinding = true
 		compose = true
-	}
-	composeOptions {
-		kotlinCompilerExtensionVersion = "1.5.8"
 	}
 
 	packaging {
@@ -85,8 +84,8 @@ dependencies {
 	implementation("androidx.compose.ui:ui-tooling-preview")
 	debugImplementation("androidx.compose.ui:ui-tooling")
 
-	implementation("com.google.dagger:hilt-android:2.51")
-	ksp("com.google.dagger:hilt-android-compiler:2.51")
+	implementation("com.google.dagger:hilt-android:2.52")
+	ksp("com.google.dagger:hilt-android-compiler:2.52")
 	ksp("androidx.hilt:hilt-compiler:1.2.0")
 	implementation("io.coil-kt:coil-compose:2.6.0")
 
