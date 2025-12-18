@@ -34,7 +34,6 @@ fun CreateGroupConversationModal(
 	onDismiss: () -> Unit,
 	onCreate: (List<ZelloUser>) -> Unit
 ) {
-	val filteredUsers = users.filter { it.supportedFeatures.groupConversations }
 	var selectedUsers by remember { mutableStateOf(listOf<ZelloUser>()) }
 
 	Dialog(onDismissRequest = {
@@ -45,7 +44,7 @@ fun CreateGroupConversationModal(
 				.fillMaxWidth(0.75f)
 				.background(color = Color.White)
 		) {
-			if (filteredUsers.isEmpty()) {
+			if (users.isEmpty()) {
 				Text(
 					text = "No available users",
 					modifier = Modifier.padding(16.dp)
@@ -56,7 +55,7 @@ fun CreateGroupConversationModal(
 						.fillMaxWidth()
 						.weight(1f)
 				) {
-					items(filteredUsers) { user ->
+					items(users) { user ->
 						Row(
 							verticalAlignment = Alignment.CenterVertically,
 							modifier = Modifier

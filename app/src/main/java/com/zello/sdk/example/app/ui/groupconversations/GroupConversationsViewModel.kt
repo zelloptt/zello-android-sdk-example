@@ -19,6 +19,7 @@ import com.zello.sdk.example.app.ui.shared.types.IncomingTextViewState
 import com.zello.sdk.example.app.ui.shared.types.IncomingVoiceMessageViewState
 import com.zello.sdk.example.app.ui.shared.types.OutgoingVoiceMessageViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,7 +27,9 @@ class GroupConversationsViewModel @Inject constructor(val zelloRepository: Zello
 	private val _groupConversations = zelloRepository.onGroupConversationsUpdated.asLiveData()
 	val groupConversations: LiveData<List<ZelloGroupConversation>> = _groupConversations
 
-	private val _users = zelloRepository.onUsersUpdated.asLiveData()
+	private val _users = zelloRepository.onUsersUpdated.map {
+		it.filter { user -> user.supportedFeatures.groupConversations }
+	}.asLiveData()
 	val users: LiveData<List<ZelloUser>> = _users
 
 	private val _isConnected = zelloRepository.isConnected.asLiveData()
