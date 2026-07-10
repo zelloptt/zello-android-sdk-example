@@ -8,11 +8,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -136,12 +136,10 @@ class ChannelsFragment : Fragment() {
 		}
 		LazyColumn(
 			modifier = Modifier.fillMaxSize(),
+			contentPadding = PaddingValues(vertical = 8.dp),
 			userScrollEnabled = outgoingVoiceMessageViewState?.state == null
 		) {
 			items(channels.size) { index ->
-				if (index != 0) {
-					Spacer(modifier = Modifier.height(8.dp))
-				}
 				Channel(
 					channel = channels[index],
 					showSendAlert = {
@@ -166,7 +164,8 @@ class ChannelsFragment : Fragment() {
 		Row(modifier = Modifier
 			.fillMaxWidth()
 			.clickable { viewModel.setSelectedContact(channel) }
-			.background(if (selectedContact?.isSameAs(channel) == true) Color.LightGray else Color.Unspecified),
+			.background(if (selectedContact?.isSameAs(channel) == true) Color.LightGray else Color.Unspecified)
+			.padding(horizontal = 16.dp, vertical = 8.dp),
 			horizontalArrangement = Arrangement.SpaceBetween,
 			verticalAlignment = Alignment.CenterVertically) {
 			val incomingEmergenciesViewState = viewModel.incomingEmergenciesViewState.observeAsState().value
@@ -200,6 +199,7 @@ class ChannelsFragment : Fragment() {
 				contact = channel,
 				isInOutgoingEmergency = isInOutgoingEmergency,
 				showEmergencyOption = isConnected && emergencyChannel?.isSameAs(channel) == true,
+				showStopIncomingEmergencyOption = isConnected && activeIncomingEmergency != null && channel.options.allowEmergencyEndOthers,
 				showAlertOption = isConnected && settings?.allowAlertMessages == true && channel.options.allowAlerts,
 				showTextOption = isConnected && settings?.allowTextMessages == true && channel.options.allowTextMessages,
 				showLocationOption = isConnected && settings?.allowLocationMessages == true && channel.options.allowLocations,
@@ -222,6 +222,9 @@ class ChannelsFragment : Fragment() {
 				stopEmergency = {
 					viewModel.stopEmergency()
 				},
+				stopIncomingEmergency = {
+					activeIncomingEmergency?.let { viewModel.stopIncomingEmergency(it) }
+				},
 				showHistory = {
 					viewModel.getHistory(channel)
 				},
@@ -240,8 +243,8 @@ class ChannelsFragment : Fragment() {
 		val outgoingVoiceMessageViewState = viewModel.outgoingVoiceMessageViewState.observeAsState().value
 		val incomingVoiceMessageViewState = viewModel.incomingVoiceMessageViewState.observeAsState().value
 		val isSameContact = outgoingVoiceMessageViewState?.contact?.isSameAs(channel) == true
-		val isConnecting = isSameContact && outgoingVoiceMessageViewState?.state == ZelloOutgoingVoiceMessage.State.CONNECTING
-		val isTalking = isSameContact && outgoingVoiceMessageViewState?.state == ZelloOutgoingVoiceMessage.State.SENDING
+		val isConnecting = isSameContact && outgoingVoiceMessageViewState.state == ZelloOutgoingVoiceMessage.State.CONNECTING
+		val isTalking = isSameContact && outgoingVoiceMessageViewState.state == ZelloOutgoingVoiceMessage.State.SENDING
 		val isReceiving = incomingVoiceMessageViewState?.contact?.isSameAs(channel) == true
 		ListItemTalkButton(
 			isEnabled = channel.status == ZelloChannel.ConnectionStatus.CONNECTED,

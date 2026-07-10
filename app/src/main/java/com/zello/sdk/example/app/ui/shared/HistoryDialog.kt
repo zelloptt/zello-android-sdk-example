@@ -97,6 +97,9 @@ private fun HistoryMessage(message: ZelloHistoryMessage, zello: Zello, onMessage
 			when (message) {
 				is ZelloHistoryVoiceMessage -> {
 					Text(text = "Duration: ${message.durationMs} ms")
+					message.transcription?.text?.let { transcriptionText ->
+						Text(text = "Transcription: $transcriptionText")
+					}
 				}
 
 				is ZelloHistoryImageMessage -> {

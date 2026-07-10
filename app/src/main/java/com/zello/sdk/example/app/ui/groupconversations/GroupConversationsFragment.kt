@@ -9,11 +9,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -173,12 +172,10 @@ class GroupConversationsFragment : Fragment() {
 		Box(modifier = Modifier.fillMaxSize()) {
 			LazyColumn(
 				modifier = Modifier
-					.fillMaxSize()
+					.fillMaxSize(),
+				contentPadding = PaddingValues(vertical = 8.dp)
 			) {
 				items(groupConversations.size) { index ->
-					if (index != 0) {
-						Spacer(modifier = Modifier.height(8.dp))
-					}
 					GroupConversation(
 						conversation = groupConversations[index],
 						showSendAlert = {
@@ -226,7 +223,8 @@ class GroupConversationsFragment : Fragment() {
 		Row(modifier = Modifier
 			.fillMaxWidth()
 			.clickable { viewModel.setSelectedContact(conversation) }
-			.background(if (selectedContact?.isSameAs(conversation) == true) Color.LightGray else Color.Unspecified),
+			.background(if (selectedContact?.isSameAs(conversation) == true) Color.LightGray else Color.Unspecified)
+			.padding(horizontal = 16.dp, vertical = 8.dp),
 			horizontalArrangement = Arrangement.SpaceBetween,
 			verticalAlignment = Alignment.CenterVertically) {
 			Column(
@@ -276,8 +274,8 @@ class GroupConversationsFragment : Fragment() {
 		val outgoingVoiceMessageViewState = viewModel.outgoingVoiceMessageViewState.observeAsState().value
 		val incomingVoiceMessageViewState = viewModel.incomingVoiceMessageViewState.observeAsState().value
 		val isSameContact = outgoingVoiceMessageViewState?.contact?.isSameAs(conversation) == true
-		val isConnecting = isSameContact && outgoingVoiceMessageViewState?.state == ZelloOutgoingVoiceMessage.State.CONNECTING
-		val isTalking = isSameContact && outgoingVoiceMessageViewState?.state == ZelloOutgoingVoiceMessage.State.SENDING
+		val isConnecting = isSameContact && outgoingVoiceMessageViewState.state == ZelloOutgoingVoiceMessage.State.CONNECTING
+		val isTalking = isSameContact && outgoingVoiceMessageViewState.state == ZelloOutgoingVoiceMessage.State.SENDING
 		val isReceiving = incomingVoiceMessageViewState?.contact?.isSameAs(conversation) == true
 		ListItemTalkButton(
 			isEnabled = true,

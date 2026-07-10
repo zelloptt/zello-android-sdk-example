@@ -1,5 +1,6 @@
 package com.zello.sdk.example.app.ui.users
 
+import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,12 +10,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -140,12 +141,10 @@ class UsersFragment : Fragment() {
 		}
 		LazyColumn(
 			modifier = Modifier.fillMaxSize(),
+			contentPadding = PaddingValues(vertical = 8.dp),
 			userScrollEnabled = outgoingVoiceMessageViewState?.state == null
 		) {
 			items(users.size) { index ->
-				if (index != 0) {
-					Spacer(modifier = Modifier.height(8.dp))
-				}
 				User(
 					user = users[index],
 					showSendAlert = {
@@ -172,16 +171,17 @@ class UsersFragment : Fragment() {
 			Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(8.dp)
 					.clickable {
 						viewModel.setSelectedContact(user)
 					}
-					.background(if (selectedContact?.isSameAs(user) == true) Color.LightGray else Color.Unspecified),
+					.background(if (selectedContact?.isSameAs(user) == true) Color.LightGray else Color.Unspecified)
+					.padding(horizontal = 16.dp, vertical = 8.dp),
 				verticalAlignment = Alignment.CenterVertically
 			) {
-				user.profilePictureThumbnailUrl?.let { url ->
+				val thumbnailUrl = user.profilePictureThumbnailUrl
+				if (thumbnailUrl != null) {
 					AsyncImage(
-						model = url,
+						model = thumbnailUrl,
 						contentDescription = "",
 						contentScale = ContentScale.Crop,
 						modifier = Modifier
@@ -189,6 +189,12 @@ class UsersFragment : Fragment() {
 							.clip(CircleShape),
 						placeholder = ColorPainter(Color.LightGray),
 						error = ColorPainter(Color.Red)
+					)
+				} else {
+					// No profile picture: fall back to a monogram derived from the display name
+					Monogram(
+						name = user.displayName.ifBlank { user.name },
+						modifier = Modifier.size(48.dp)
 					)
 				}
 				Column(
@@ -234,8 +240,8 @@ class UsersFragment : Fragment() {
 		val outgoingVoiceMessageViewState = viewModel.outgoingVoiceMessageViewState.observeAsState().value
 		val incomingVoiceMessageViewState = viewModel.incomingVoiceMessageViewState.observeAsState().value
 		val isSameContact = outgoingVoiceMessageViewState?.contact?.isSameAs(user) == true
-		val isConnecting = isSameContact && outgoingVoiceMessageViewState?.state == ZelloOutgoingVoiceMessage.State.CONNECTING
-		val isTalking = isSameContact && outgoingVoiceMessageViewState?.state == ZelloOutgoingVoiceMessage.State.SENDING
+		val isConnecting = isSameContact && outgoingVoiceMessageViewState.state == ZelloOutgoingVoiceMessage.State.CONNECTING
+		val isTalking = isSameContact && outgoingVoiceMessageViewState.state == ZelloOutgoingVoiceMessage.State.SENDING
 		val isReceiving = incomingVoiceMessageViewState?.contact?.isSameAs(user) == true
 		ListItemTalkButton(
 			isEnabled = true,
@@ -245,6 +251,36 @@ class UsersFragment : Fragment() {
 			onDown = { viewModel.startVoiceMessage(user) },
 			onUp = { viewModel.stopVoiceMessage() }
 		)
+	}
+
+	@Composable
+	private fun Monogram(
+		name: String,
+		modifier: Modifier = Modifier
+	) {
+		Box(
+			modifier = modifier.background(monogramColor(name), CircleShape),
+			contentAlignment = Alignment.Center
+		) {
+			Text(
+				text = initialsOf(name),
+				color = Color.White,
+				fontWeight = FontWeight.Bold
+			)
+		}
+	}
+
+	private fun initialsOf(name: String): String {
+		val parts = name.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
+		val first = parts.firstOrNull()?.firstOrNull()?.uppercaseChar()
+		val last = if (parts.size > 1) parts.last().firstOrNull()?.uppercaseChar() else null
+		return listOfNotNull(first, last).joinToString("").ifEmpty { "?" }
+	}
+
+	private fun monogramColor(name: String): Color {
+		// Derive a stable hue from the name so each contact keeps a consistent color
+		val hue = ((name.hashCode() % 360) + 360) % 360
+		return Color(AndroidColor.HSVToColor(floatArrayOf(hue.toFloat(), 0.55f, 0.65f)))
 	}
 
 	override fun onDestroyView() {

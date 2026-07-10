@@ -17,8 +17,12 @@ class ChannelPreviewProvider : PreviewParameterProvider<ZelloChannel> {
 				allowAlerts = false,
 				allowTextMessages = false,
 				allowLocations = false,
-				emergencyOnly = false
-			)
+				emergencyOnly = false,
+				allowEmergencyEndOwn = true,
+				allowEmergencyEndOthers = false
+			),
+			translationsEnabled = false,
+			type = ZelloChannel.ChannelType.DYNAMIC
 		)
 	)
 }

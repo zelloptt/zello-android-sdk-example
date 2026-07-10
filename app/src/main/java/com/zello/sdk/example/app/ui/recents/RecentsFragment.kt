@@ -6,10 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
@@ -60,12 +62,10 @@ class RecentsFragment : Fragment() {
 	private fun Recents() {
 		val recents = viewModel.recents.observeAsState().value ?: emptyList()
 		LazyColumn(
-			modifier = Modifier.fillMaxSize()
+			modifier = Modifier.fillMaxSize(),
+			contentPadding = PaddingValues(vertical = 8.dp)
 		) {
 			items(recents.size) { index ->
-				if (index != 0) {
-					Spacer(modifier = Modifier.height(8.dp))
-				}
 				Recent(recent = recents[index])
 			}
 		}
@@ -78,7 +78,7 @@ class RecentsFragment : Fragment() {
 			else -> contact.name
 		}
 		val title = if (recent.channelUser != null) "${recent.channelUser?.displayName} : $contactName" else contactName
-		Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+		Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
 			Image(
 				painter = painterResource(id = if (recent.incoming) R.drawable.ic_incoming_24dp else R.drawable.ic_outgoing_24dp),
 				contentDescription = "Incoming or outgoing message"

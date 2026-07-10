@@ -42,6 +42,14 @@ class ZelloRepository @Inject constructor(
 	private val _isConnecting = MutableStateFlow(false)
 	val isConnecting = _isConnecting.asStateFlow()
 
+	// True from a successful connect until a final (non-reconnecting) disconnect. Stays true across
+	// automatic reconnects so the UI can keep the signed-in session while the network recovers.
+	private val _isSignedIn = MutableStateFlow(false)
+	val isSignedIn = _isSignedIn.asStateFlow()
+	// True while the SDK is auto-reconnecting after an unexpected network drop.
+	private val _isReconnecting = MutableStateFlow(false)
+	val isReconnecting = _isReconnecting.asStateFlow()
+
 	private val _selectedContact = MutableStateFlow<ZelloContact?>(null)
 	val selectedContact = _selectedContact.asStateFlow()
 
@@ -107,23 +115,41 @@ class ZelloRepository @Inject constructor(
 
 	override fun onConnectFailed(zello: Zello, error: ZelloConnectionError) {
 		Toast.makeText(context, "Failed to connect ${error.name}", Toast.LENGTH_SHORT).show()
+		// A sign-in failure is NOT a full disconnect: the SDK reports terminal teardown exclusively
+		// through onDisconnected(reconnecting = false). Only clear the transient "connecting" flag
+		// here and leave the session/reconnect flags alone, so a failed reconnect attempt does not
+		// prematurely drop the signed-in UI (tabs, etc.).
 		_isConnecting.value = false
 	}
 
 	override fun onConnectSucceeded(zello: Zello) {
 		_isConnected.value = true
 		_isConnecting.value = false
+		_isReconnecting.value = false
+		_isSignedIn.value = true
 	}
 
-	override fun onDisconnected(zello: Zello) {
+	override fun onDisconnected(zello: Zello, reconnecting: Boolean) {
 		_isConnected.value = false
 		_isConnecting.value = false
-		_onUsersUpdated.value = zello.users
-		_onChannelsUpdated.value = zello.channels
-		_onGroupConversationsUpdated.value = zello.groupConversations
+		_isReconnecting.value = reconnecting
+		// Only tear down the session on a final disconnect. During an automatic reconnect the SDK
+		// keeps the cached contact list, so we keep the session signed in and leave the lists intact.
+		if (!reconnecting) {
+			_isSignedIn.value = false
+			_onUsersUpdated.value = zello.users
+			_onChannelsUpdated.value = zello.channels
+			_onGroupConversationsUpdated.value = zello.groupConversations
+			// Clear the recents that onRecentsUpdated intentionally preserved during the reconnect.
+			_onRecentsUpdated.value = zello.recents
+		}
 	}
 
 	override fun onWillReconnect(zello: Zello) {
+		// Transient network drop: keep the session (and cached contacts) but reflect that we are no
+		// longer actively connected while the SDK reconnects.
+		_isConnected.value = false
+		_isReconnecting.value = true
 	}
 
 	override fun onAccountStatusChanged(zello: Zello, status: ZelloAccountStatus?) {
@@ -229,10 +255,23 @@ class ZelloRepository @Inject constructor(
 	}
 
 	override fun onRecentsUpdated(zello: Zello, recents: List<ZelloRecentEntry>) {
+		// The SDK clears its recents on every disconnect - including transient ones - and pushes an
+		// empty list. While auto-reconnecting, keep the last known recents so the Recents tab keeps
+		// showing content, mirroring how the cached contact lists survive a reconnect. A final
+		// (non-reconnecting) disconnect clears them via onDisconnected below.
+		if (_isReconnecting.value && recents.isEmpty()) {
+			return
+		}
 		_onRecentsUpdated.value = recents
 	}
 
 	override fun onHistoryUpdated(zello: Zello) {
+		onHistoryUpdated.value?.first?.let {
+			_onHistoryUpdated.value = Pair(first = it, second = zello.getHistory(it))
+		}
+	}
+
+	override fun onHistoryVoiceMessageTranscriptionAvailable(zello: Zello, message: ZelloHistoryVoiceMessage) {
 		onHistoryUpdated.value?.first?.let {
 			_onHistoryUpdated.value = Pair(first = it, second = zello.getHistory(it))
 		}
