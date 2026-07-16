@@ -25,6 +25,7 @@ fun ThreeDotsMenu(
 	contact: ZelloContact,
 	showEmergencyOption: Boolean = false,
 	isInOutgoingEmergency: Boolean = false,
+	showStopIncomingEmergencyOption: Boolean = false,
 	showAlertOption: Boolean = true,
 	showLocationOption: Boolean = true,
 	showTextOption: Boolean = true,
@@ -40,6 +41,7 @@ fun ThreeDotsMenu(
 	toggleMute: () -> Unit,
 	startEmergency: (() -> Unit)? = null,
 	stopEmergency: (() -> Unit)? = null,
+	stopIncomingEmergency: (() -> Unit)? = null,
 	showHistory: () -> Unit,
 	endCall: (() -> Unit)? = null,
 	addUsersToConversation: (() -> Unit)? = null,
@@ -122,6 +124,15 @@ fun ThreeDotsMenu(
 						} else {
 							startEmergency?.invoke()
 						}
+						dropDownExpanded = false
+					}
+				)
+			}
+			if (showStopIncomingEmergencyOption) {
+				DropdownMenuItem(
+					text = { Text("Stop Incoming Emergency") },
+					onClick = {
+						stopIncomingEmergency?.invoke()
 						dropDownExpanded = false
 					}
 				)

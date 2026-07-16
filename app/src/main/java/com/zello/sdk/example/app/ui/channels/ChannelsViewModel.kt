@@ -11,6 +11,7 @@ import com.zello.sdk.ZelloDispatchChannel
 import com.zello.sdk.ZelloHistoryMessage
 import com.zello.sdk.ZelloHistoryVoiceMessage
 import com.zello.sdk.ZelloConsoleSettings
+import com.zello.sdk.ZelloIncomingEmergency
 import com.zello.sdk.example.app.repositories.ZelloRepository
 import com.zello.sdk.example.app.ui.shared.types.IncomingAlertViewState
 import com.zello.sdk.example.app.ui.shared.types.IncomingEmergenciesViewState
@@ -141,6 +142,10 @@ class ChannelsViewModel @Inject constructor(val zelloRepository: ZelloRepository
 
 	fun stopEmergency() {
 		zelloRepository.zello.stopEmergency()
+	}
+
+	fun stopIncomingEmergency(incomingEmergency: ZelloIncomingEmergency) {
+		zelloRepository.zello.stopIncomingEmergency(incomingEmergency)
 	}
 
 	fun imageDismissed() {
