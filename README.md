@@ -1,10 +1,10 @@
 ### Android Studio support
 
-To use Zello’s SDK example app, you need Android Studio **Koala | 2024.1.1** or newer. Using a previous version of Android Studio Koala may prompt an error message like the following:
+To use Zello’s SDK example app, you need a recent version of Android Studio that supports the project’s Android Gradle plugin (AGP) version. An older version of Android Studio may prompt an error message like the following:
 
-The project is using an incompatible version (AGP 8.3.1) of the Android Gradle plugin. Latest supported version is AGP 8.2.1
+The project is using an incompatible version of the Android Gradle plugin.
 
-Please note that this example app **has not** been tested on earlier versions of Android Studio.
+If you see this message, update Android Studio to the latest stable release. Please note that this example app **has not** been tested on earlier versions of Android Studio.
 
 ### Start
 
