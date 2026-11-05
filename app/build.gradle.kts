@@ -1,11 +1,11 @@
 plugins {
 	alias(libs.plugins.androidApplication)
-	id("org.jetbrains.kotlin.plugin.compose") version "2.3.20"
-	id("com.google.dagger.hilt.android") version "2.59.2"
-	id("com.google.devtools.ksp") version "2.3.6"
+	alias(libs.plugins.compose.compiler)
+	alias(libs.plugins.hilt)
+	alias(libs.plugins.ksp)
 	// Uncomment to enable Firebase services. Requires google-services.json file.
 	// Also uncomment the noted line in the project level build.gradle.kts file.
-	// id("com.google.gms.google-services") version "4.4.4"
+	// alias(libs.plugins.google.services)
 }
 
 hilt {
@@ -14,16 +14,20 @@ hilt {
 
 android {
 	namespace = "com.zello.sdk.example.app"
-	compileSdk = 36
+	compileSdk {
+		version = release(37) {
+			minorApiLevel = 2
+		}
+	}
 
 	defaultConfig {
 		applicationId = "com.zello.sdk.example.app"
 		minSdk = 27
-		targetSdk = 36
+		targetSdk = 37
 		versionCode = 1
 		versionName = "1.0"
 
-		ndkVersion = "27.0.12077973"
+		ndkVersion = "29.0.14206865"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
 
@@ -58,27 +62,22 @@ dependencies {
 	// The only dependency needed to use the Zello SDK
 	implementation(libs.sdk)
 
-	implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
-	implementation("com.google.firebase:firebase-messaging")
+	implementation(platform(libs.androidx.compose.bom))
 
-	val composeBom = platform("androidx.compose:compose-bom:2024.06.00")
-	implementation(composeBom)
-	androidTestImplementation(composeBom)
-
-	implementation("androidx.compose.runtime:runtime")
-	implementation("androidx.compose.runtime:runtime-livedata")
+	implementation(libs.androidx.compose.runtime)
+	implementation(libs.androidx.compose.runtime.livedata)
 
 	// Material Design 3
-	implementation("androidx.compose.material3:material3")
+	implementation(libs.androidx.compose.material3)
+	implementation(libs.androidx.compose.material.icons.core)
 
 	// Android Studio Preview support
-	implementation("androidx.compose.ui:ui-tooling-preview")
-	debugImplementation("androidx.compose.ui:ui-tooling")
+	implementation(libs.androidx.compose.ui.tooling.preview)
+	debugImplementation(libs.androidx.compose.ui.tooling)
 
-	implementation("com.google.dagger:hilt-android:2.59.2")
-	ksp("com.google.dagger:hilt-android-compiler:2.59.2")
-	ksp("androidx.hilt:hilt-compiler:1.3.0")
-	implementation("io.coil-kt:coil-compose:2.7.0")
+	implementation(libs.hilt.android)
+	ksp(libs.hilt.android.compiler)
+	implementation(libs.coil.compose)
 
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.appcompat)
@@ -91,5 +90,4 @@ dependencies {
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
-	implementation(kotlin("script-runtime"))
 }
